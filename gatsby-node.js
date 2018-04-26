@@ -17,31 +17,35 @@ exports.onCreateNode = ({ node,getNode,boundActionCreators }) =>{
     }
 }
 
-exports.createPages = async ({ graphql , boundActionCreators }) => {
+exports.createPages =  ({ graphql , boundActionCreators }) => {
     const { createPage } = boundActionCreators
 
     // tant que la function est pas finie , il ne passera pas à la suite
-    const res = await graphql(`
-    {
-        allMarkdownRemark {
-          edges {
-            node {
-              fields {
-                slug
-              }
+    return new Promise((resolve,reject)=>{
+        res =  graphql(`
+            {
+                allMarkdownRemark {
+                edges {
+                    node {
+                    fields {
+                        slug
+                    }
+                    }
+                }
+                }
             }
-          }
-        }
-    }
-    `)
-    console.log(res)
-    res.data.allMarkdownRemark.edges.map(({node})=>{
-        createPage({
-            path: node.fields.slug,
-            component: path.resolve('./src/templates/page.js'),
-            context: {
-                slug: node.fields.slug
-            }
+        `).then(res =>{
+            console.log(res)
+            res.data.allMarkdownRemark.edges.map(({node})=>{
+                createPage({
+                    path: node.fields.slug,
+                    component: path.resolve('./src/templates/page.js'),
+                    context: {
+                        slug: node.fields.slug
+                    }
+                })
+            })
+            resolve()
         })
-    })
+    }) 
 }
